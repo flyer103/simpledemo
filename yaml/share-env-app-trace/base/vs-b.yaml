@@ -1,0 +1,19 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: b
+  namespace: base-env-dev
+spec:
+  hosts:
+  - b
+  http:
+  - match:
+    - headers:
+        x-env:
+         exact: dev2
+    route:
+    - destination:
+        host: b.dev2-env-dev.svc.cluster.local
+  - route:
+    - destination:
+        host: b.base-env-dev.svc.cluster.local

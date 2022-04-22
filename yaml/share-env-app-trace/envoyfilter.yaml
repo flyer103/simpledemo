@@ -1,0 +1,86 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: EnvoyFilter
+metadata:
+  name: zadig-share-env
+  namespace: istio-system
+spec:
+  configPatches:
+  - applyTo: HTTP_FILTER
+    match:
+      context: SIDECAR_INBOUND
+      listener:
+        filterChain:
+          filter:
+            name: envoy.filters.network.http_connection_manager
+            subFilter:
+              name: envoy.filters.http.router
+    patch:
+      operation: INSERT_BEFORE
+      value:
+        name: envoy.lua
+        typed_config:
+          "@type": type.googleapis.com/envoy.extensions.filters.http.lua.v3.Lua
+          inlineCode: |-
+            function envoy_on_request(request_handle)
+                local requestID = request_handle:headers():get("x-request-id")
+                local env = request_handle:headers():get("x-env")
+                local headers, body = request_handle:httpCall(
+                  "cache",
+                  {
+                    [":method"] = "POST",
+                    [":path"] = string.format("/api/v1/%s/%s", requestID, env),
+                    [":authority"] = "cache",
+                  },
+                  "",
+                  5000
+                )
+            end
+  - applyTo: HTTP_FILTER
+    match:
+      context: SIDECAR_OUTBOUND
+      listener:
+        filterChain:
+          filter:
+            name: envoy.filters.network.http_connection_manager
+            subFilter:
+              name: envoy.filters.http.router
+    patch:
+      operation: INSERT_BEFORE
+      value:
+        name: envoy.lua
+        typed_config:
+          "@type": type.googleapis.com/envoy.extensions.filters.http.lua.v3.Lua
+          inlineCode: |-
+            function envoy_on_request(request_handle)
+              local requestID = request_handle:headers():get("x-request-id")
+              local headers, body = request_handle:httpCall(
+                "cache",
+                {
+                  [":method"] = "GET",
+                  [":path"] = string.format("/api/v1/%s", requestID),
+                  [":authority"] = "cache",
+                },
+                "",
+                5000
+              )
+
+              request_handle:headers():add("x-env", headers["x-data"]);
+            end
+  - applyTo: CLUSTER
+    patch:
+      operation: ADD
+      value:
+        name: "cache"
+        type: STRICT_DNS
+        connect_timeout: 3.0s
+        lb_policy: ROUND_ROBIN
+        load_assignment:
+          cluster_name: cache
+          endpoints:
+          - lb_endpoints:
+            - endpoint:
+                address:
+                  socket_address:
+                    protocol: TCP
+                    address: "cache.default.svc.cluster.local"
+                    port_value: 80

@@ -1,0 +1,48 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: c
+  namespace: base-env-dev
+  labels:
+    app: c
+spec:
+  ports:
+  - name: http
+    port: 80
+    targetPort: 8082
+  selector:
+    app: c
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: c
+  namespace: base-env-dev
+  labels:
+    app: c
+    version: base
+spec:
+  selector:
+    matchLabels:
+      app: c
+      version: base
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: c
+        version: base
+    spec:
+      containers:
+      - name: nginx
+        image: ccr.ccs.tencentyun.com/flyer103/myapp-3:6318d09__linux_amd64
+        imagePullPolicy: Always
+        command: ["/myapp-3"]
+        ports:
+        - containerPort: 8082
+        resources:
+          limits:
+            cpu: 100m
+            memory: 100Mi

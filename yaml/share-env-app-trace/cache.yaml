@@ -1,0 +1,43 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: cache
+  labels:
+    app: cache
+spec:
+  ports:
+  - name: http
+    port: 80
+    targetPort: 8083
+  selector:
+    app: cache
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cache
+  labels:
+    app: cache
+spec:
+  selector:
+    matchLabels:
+      app: cache
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: cache
+    spec:
+      containers:
+      - name: nginx
+        image: ccr.ccs.tencentyun.com/flyer103/cache:v0.1-1-g261e378-dirty__linux_amd64
+        imagePullPolicy: Always
+        command: ["/cache"]
+        ports:
+        - containerPort: 8083
+        resources:
+          limits:
+            cpu: 100m
+            memory: 100Mi

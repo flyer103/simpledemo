@@ -1,0 +1,54 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: b
+  namespace: dev2-env-dev
+  labels:
+    app: b
+spec:
+  ports:
+  - name: http
+    port: 80
+    targetPort: 8081
+  selector:
+    app: b
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: b
+  namespace: dev2-env-dev
+  labels:
+    app: b
+    version: dev2
+spec:
+  selector:
+    matchLabels:
+      app: b
+      version: dev2
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: b
+        version: dev2
+    spec:
+      containers:
+      - name: nginx
+        image: ccr.ccs.tencentyun.com/flyer103/myapp-2:6318d09__linux_amd64
+        imagePullPolicy: Always
+        command: ["/myapp-2"]
+        args: ["--downstream-addr", "$(DOWNSTREAM_ADDR)", "--headers", "$(HEADERS)"]
+        env:
+        - name: DOWNSTREAM_ADDR
+          value: "c"
+        - name: HEADERS
+          value: "x-request-id"
+        ports:
+        - containerPort: 8081
+        resources:
+          limits:
+            cpu: 100m
+            memory: 100Mi
