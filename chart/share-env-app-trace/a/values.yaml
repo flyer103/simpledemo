@@ -23,4 +23,4 @@ resources:
     memory: 128Mi
 
 imagePullSecrets:
-- name: qn-registry-secret
+- name: default-registry-secret
