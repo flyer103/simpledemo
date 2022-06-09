@@ -32,9 +32,9 @@ spec:
     spec:
       containers:
       - name: b
-        image: ccr.ccs.tencentyun.com/koderover-rc/myapp-2-grpc:v0.1-6-g227364d__darwin_arm64
+        image: ccr.ccs.tencentyun.com/koderover-rc/myapp-2-grpc:v0.1-6-g227364d
         imagePullPolicy: Always
-        command: ["/myapp-2"]
+        command: ["/myapp-2-grpc"]
         args: ["--downstream-addr", "$(DOWNSTREAM_ADDR)", "--headers", "$(HEADERS)"]
         env:
         - name: DOWNSTREAM_ADDR

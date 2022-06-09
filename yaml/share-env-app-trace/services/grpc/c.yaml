@@ -32,9 +32,9 @@ spec:
     spec:
       containers:
       - name: c
-        image: ccr.ccs.tencentyun.com/koderover-rc/myapp-3-grpc:v0.1-6-g227364d__darwin_arm64
+        image: ccr.ccs.tencentyun.com/koderover-rc/myapp-3-grpc:v0.1-6-g227364d
         imagePullPolicy: Always
-        command: ["/myapp-3"]
+        command: ["/myapp-3-grpc"]
         ports:
         - containerPort: 8082
         resources:
