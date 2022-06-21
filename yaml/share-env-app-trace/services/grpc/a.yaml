@@ -6,9 +6,9 @@ metadata:
     app: a
 spec:
   ports:
-  - name: http
+  - protocol: TCP
     port: 80
-    targetPort: 8080
+    targetPort: grpc-svc
   selector:
     app: a
 
@@ -38,11 +38,12 @@ spec:
         args: ["--downstream-addr", "$(DOWNSTREAM_ADDR)", "--headers", "$(HEADERS)"]
         env:
         - name: DOWNSTREAM_ADDR
-          value: "b"
+          value: "b:80"
         - name: HEADERS
           value: "x-request-id"
         ports:
         - containerPort: 8080
+          name: grpc-svc
         resources:
           limits:
             cpu: 100m

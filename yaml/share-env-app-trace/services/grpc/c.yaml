@@ -6,9 +6,9 @@ metadata:
     app: c
 spec:
   ports:
-  - name: http
+  - protocol: TCP
     port: 80
-    targetPort: 8082
+    targetPort: grpc-svc
   selector:
     app: c
 
@@ -37,6 +37,7 @@ spec:
         command: ["/myapp-3-grpc"]
         ports:
         - containerPort: 8082
+          name: grpc-svc
         resources:
           limits:
             cpu: 100m
