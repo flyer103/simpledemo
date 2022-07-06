@@ -4,3 +4,4 @@ metadata:
   name: data
 data:
   name: flyer
+  gender: male
